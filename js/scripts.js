@@ -5,7 +5,7 @@ var fontImage = null
 var fontInfo = null
 var overlayNames = null
 var overlayOverrides = null
-var selectedGenerator = null
+var selectedGenerator = 'cyberpunk'
 var glitch = false
 
 var generators={
@@ -29,11 +29,7 @@ function applyHashChange(){
 	selectGenerator()
 }
 
-if(window.location.hash.length > 0){
-	applyHashChange()
-}
 
-window.addEventListener("hashchange", applyHashChange,false)
 
 function first(){
 	for(var i=0;i<arguments.length;i++){
@@ -497,7 +493,6 @@ function addDebugAlerts(gen, debugdiv){
 function selectGenerator(){
 
 	var gen=generators[selectedGenerator]
-	window.location.hash=(glitch?'-':'') + selectedGenerator
 	if(gen === undefined){
 		gen={
 			title:'placeholder',
@@ -580,9 +575,8 @@ function selectGenerator(){
 	loadJSONForGenerator()
 	$('.source').remove();
 
-	gamesPath = 'games/' + selectedGenerator + '/'
-	baseImage = $('<img id="template" class="source" />').attr('src', gamesPath + selectedGenerator + '-blank.png').appendTo('body')[0]
-	fontImage = $('<img id="font" class="source" />').attr('src', gamesPath + selectedGenerator + '-font.png').appendTo('body')[0]
+	baseImage = $('<img id="template" class="source" />').attr('src', 'cyberpunk-blank.jpeg').appendTo('body')[0]
+	fontImage = $('<img id="font" class="source" />').attr('src', 'cyberpunk-font.png').appendTo('body')[0]
 
 	baseImage = null
 	$('.source').waitForImages(true).done(function(){
@@ -1010,22 +1004,11 @@ function resetOverlays(){
 
 function loadJSONForGenerator(){
 
-	gamesPath = 'games/' + selectedGenerator + '/'
-	$.getJSON(gamesPath + selectedGenerator + ".json",function(data){
+	$.getJSON("cyberpunk.json",function(data){
 		fontInfo = data
 		resetOverlays()
 		$('.wordwrap').toggle('wrap-width' in fontInfo)
 		renderText()
-		$('#makegif').toggle(!!fontInfo.gif)
-		if(fontInfo.script){
-			$.getScript(gamesPath + selectedGenerator + ".js");
-		}
-
-		if('notes' in fontInfo){
-			$('#notes').text(fontInfo.notes)
-		}else{
-			$('#notes').text('')
-		}
 		
 	})
 
@@ -1038,10 +1021,6 @@ function getNameForCurrentImage(ext){
 	return selectedGenerator + "-" + text + "." + ext
 }
 
-if(selectedGenerator===null){
-	var generator_names = Object.keys(generators)
-	selectedGenerator = generator_names[Math.round(generator_names.length * Math.random())]
-}
 selectGenerator()
 $('#sourcetext').keyup(renderText)
 $(window).resize(function () { renderText() });
