@@ -1018,7 +1018,7 @@ function loadJSONForGenerator(){
 function getNameForCurrentImage(ext){
 	var text = document.querySelector("textarea#sourcetext").value
 	text = text.replace(/\n/g," ").replace(/[^-._a-zA-Z0-9 ]/g,"")
-	return selectedGenerator + "-" + text + "." + ext
+	return selectedGenerator + "-" + text.substring(0,64) + "." + ext
 }
 
 selectGenerator()
