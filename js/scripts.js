@@ -1031,13 +1031,13 @@ $('.wordwrap').change(renderText)
 function getDataURLImage(){
 	// generate an unscaled version
 	renderText(false)
-	return context.canvas.toDataURL('image/png')
+	return context.canvas.toDataURL('image/jpeg')
 
 }
 
 $('#save').click(function(){
 	this.href = getDataURLImage()
-	this.download = getNameForCurrentImage("png")
+	this.download = getNameForCurrentImage("jpeg")
 	return true
 })
 $('a#upload').click(function(){
