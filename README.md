@@ -5,6 +5,8 @@ The Cyberpunk 2077 Generator
 This is a quick hacked up version of the Death Generator to make the
 Cyberpunk 2077 apology images.
 
+Try it out at [sorrypunk.com](http://sorrypunk.com)
+
 License
 =============================
 All the code is GPL3 licensed.
