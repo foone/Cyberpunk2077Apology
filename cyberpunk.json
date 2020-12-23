@@ -5,6 +5,10 @@
 		"x": 145,
 		"y": 205
 	},
+	"dynamic-size": {
+		"w": "overlays.size.data.info.w",
+		"h": "overlays.size.data.info.h"
+	},
 	"explicit-origins": {
 		"0": {
 			"x": 148,
@@ -16,6 +20,40 @@
 		}
 	},
 	"wrap-width": 1680,
+
+	"overlays": {
+		"size": {
+			"x": 0,
+			"y": 461,
+			"title": "Image size",
+			"default": "large",
+			"options": {
+				"small": {
+					"x": 0,
+					"y": 62,
+					"w": 1015,
+					"h": 153,
+					"title":"Small (good for twitter)",
+					"info": {
+						"w": 1015,
+						"h": 614
+					}
+				},
+				"large": {
+					"x": 0,
+					"y": -16,
+					"w": 8,
+					"h": 8,
+					"title":"Large (original image size)",
+					"info": {
+						"w": 1920,
+						"h": 1080
+					}
+				}
+			}
+		}
+	},
+
 	"subfonts": {
 		"bold": {
 			"height": 40,
