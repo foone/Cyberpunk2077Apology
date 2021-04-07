@@ -178,7 +178,14 @@ class Snippet{
 			if(lastchar in char['unadvance-after']){
 				x-= char['unadvance-after'][lastchar]
 			}
-			context.drawImage(this.font.image,char.x,char.y,char.w,char.h,x*scale,y*scale + char['vertical-shift'],char.w*scale,char.h*scale)
+			var xpos = x*scale
+			var ypos = y*scale + char['vertical-shift']
+			if(char.native){
+				configureCanvasFont()
+				context.fillText(char.string,xpos,ypos)
+			}else{
+				context.drawImage(this.font.image,char.x,char.y,char.w,char.h,xpos,ypos,char.w*scale,char.h*scale)
+			}
 			x+=(char.w - char.unadvance)
 			last = char.unadvance
 			lastchar = char.char
@@ -207,37 +214,53 @@ class Snippet{
 			}
 			var info=font[c]
 			if(info==null){
-				info=font[font["null-character"]]
-			}
-			var lig_unadvance = undefined
-			var matching_ligatures = Object.keys(ligatures).filter(x=>line.substring(i,i+x.length)==x)
-			if(matching_ligatures.length>0){
-				// Pick the longest match if there are multiple matches
-				matching_ligatures.sort((a,b) => b.length - a.length)
-				var old_info = info
-				info = ligatures[matching_ligatures[0]]
-				var lig_chain = first(info['ligature-chain'], defaultInfo['ligature-chain'], 0)
-				if(lig_chain>0){
-					// FIXME: This won't calculate the correct unadvance if the chain is >1! 
-					lig_unadvance = first(info.unadvance, defaultInfo.unadvance, 0) + first(old_info.w, defaultInfo.w) - 1 
+				var s = line.substring(i,i+1)
+				configureCanvasFont()
+				var metrics = context.measureText(s)
+				out.push({
+					'x': 0,
+					'y': 0,
+					'w': metrics.width,
+					'h': metrics.fontBoundingBoxAscent+metrics.fontBoundingBoxDescent,
+					'unadvance': 0,
+					'unadvance-after': {},
+					'vertical-shift': 0,
+					'char':c,
+					'native':true,
+					'string':s
+				})
+			}else{
+				var lig_unadvance = undefined
+				var matching_ligatures = Object.keys(ligatures).filter(x=>line.substring(i,i+x.length)==x)
+				if(matching_ligatures.length>0){
+					// Pick the longest match if there are multiple matches
+					matching_ligatures.sort((a,b) => b.length - a.length)
+					var old_info = info
+					info = ligatures[matching_ligatures[0]]
+					var lig_chain = first(info['ligature-chain'], defaultInfo['ligature-chain'], 0)
+					if(lig_chain>0){
+						// FIXME: This won't calculate the correct unadvance if the chain is >1! 
+						lig_unadvance = first(info.unadvance, defaultInfo.unadvance, 0) + first(old_info.w, defaultInfo.w) - 1 
+					}
+					// Extend i by the length of the ligature, minus 1 since the for loop will do i++
+					i+= Math.max(0, (matching_ligatures[0].length -1 ) - lig_chain) 
 				}
-				// Extend i by the length of the ligature, minus 1 since the for loop will do i++
-				i+= Math.max(0, (matching_ligatures[0].length -1 ) - lig_chain) 
+				var x=first(info.x, defaultInfo.x)
+				if(glitch){
+					x*=0.95
+				}
+				out.push({
+					'x': x,
+					'y': first(info.y, defaultInfo.y, fontOriginY),
+					'w': first(info.w, defaultInfo.w),
+					'h': first(info.h, defaultInfo.h),
+					'unadvance': first(lig_unadvance, info.unadvance, defaultInfo.unadvance, 0),
+					'unadvance-after': first(info['unadvance-after'],{}),
+					'vertical-shift': first(info['vertical-shift'], 0),
+					'char':c,
+					'native':false
+				})
 			}
-			var x=first(info.x, defaultInfo.x)
-			if(glitch){
-				x*=0.95
-			}
-			out.push({
-				'x': x,
-				'y': first(info.y, defaultInfo.y, fontOriginY),
-				'w': first(info.w, defaultInfo.w),
-				'h': first(info.h, defaultInfo.h),
-				'unadvance': first(lig_unadvance, info.unadvance, defaultInfo.unadvance, 0),
-				'unadvance-after': first(info['unadvance-after'],{}),
-				'vertical-shift': first(info['vertical-shift'], 0),
-				'char':c
-			})
 		}
 		return out
 	}
@@ -663,7 +686,11 @@ function getAllPossibleOptions(){
 
 	return opts;
 }
-
+function configureCanvasFont(){
+	context.font = "29px verdana"
+	context.fillStyle = "black"
+	context.textBaseline = "top"
+}
 function renderText(scaled = true, wordwrap_dryrun=false){
 	if(fontInfo == null || baseImage == null){
 		return
