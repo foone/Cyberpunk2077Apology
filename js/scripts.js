@@ -205,18 +205,15 @@ class Snippet{
 			line = line.toLowerCase()
 		}
 		var ligatures = first(font.ligatures, {})
-		
-		for(var i=0;i<line.length;i++){
-			var c=line.charCodeAt(i)
-			if(c>= 0xD800 && c<=0xDBFF){
-				c = line.codePointAt(i)
-				i++; // Can this be more than 2? ARG JS UNICODE IS BAD
+		var split_chars = toArray(line)
+		for(let str of split_chars){
+			var info = null
+			if(str.length==1){
+				info=font[str.codePointAt(0)]
 			}
-			var info=font[c]
 			if(info==null){
-				var s = line.substring(i,i+1)
 				configureCanvasFont()
-				var metrics = context.measureText(s)
+				var metrics = context.measureText(str)
 				out.push({
 					'x': 0,
 					'y': 0,
@@ -225,26 +222,11 @@ class Snippet{
 					'unadvance': 0,
 					'unadvance-after': {},
 					'vertical-shift': 0,
-					'char':c,
+					'char':-1,
 					'native':true,
-					'string':s
+					'string':str
 				})
 			}else{
-				var lig_unadvance = undefined
-				var matching_ligatures = Object.keys(ligatures).filter(x=>line.substring(i,i+x.length)==x)
-				if(matching_ligatures.length>0){
-					// Pick the longest match if there are multiple matches
-					matching_ligatures.sort((a,b) => b.length - a.length)
-					var old_info = info
-					info = ligatures[matching_ligatures[0]]
-					var lig_chain = first(info['ligature-chain'], defaultInfo['ligature-chain'], 0)
-					if(lig_chain>0){
-						// FIXME: This won't calculate the correct unadvance if the chain is >1! 
-						lig_unadvance = first(info.unadvance, defaultInfo.unadvance, 0) + first(old_info.w, defaultInfo.w) - 1 
-					}
-					// Extend i by the length of the ligature, minus 1 since the for loop will do i++
-					i+= Math.max(0, (matching_ligatures[0].length -1 ) - lig_chain) 
-				}
 				var x=first(info.x, defaultInfo.x)
 				if(glitch){
 					x*=0.95
@@ -254,10 +236,10 @@ class Snippet{
 					'y': first(info.y, defaultInfo.y, fontOriginY),
 					'w': first(info.w, defaultInfo.w),
 					'h': first(info.h, defaultInfo.h),
-					'unadvance': first(lig_unadvance, info.unadvance, defaultInfo.unadvance, 0),
+					'unadvance': first(info.unadvance, defaultInfo.unadvance, 0),
 					'unadvance-after': first(info['unadvance-after'],{}),
 					'vertical-shift': first(info['vertical-shift'], 0),
-					'char':c,
+					'char':str.codePointAt(0),
 					'native':false
 				})
 			}
